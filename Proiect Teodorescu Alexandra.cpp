@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include<string>
 #define CRT_SECURE_NO_WARNINGS
@@ -23,7 +24,7 @@ public:
         this->marcaModel = new char[strlen("Skoda") + 1];
         strcpy_s(this->marcaModel, strlen("Skoda") + 1, "Skoda");
         this->presiuneRoti = NULL;
-        this->nrRoti = 6;
+        this->nrRoti = 0;
     }
     Automobil(const char* marcaModel, string nrSerie, int nrRoti) :nrSerie(nrSerie) {
         nrAutomobile++;
@@ -97,15 +98,7 @@ public:
 
     }
 
-    friend ostream& operator<<(ostream& automobil, const Automobil& a) {
-        automobil << "Marca: " << a.marcaModel << " ,Serie: " << a.nrSerie << ", Numar roti: " << a.nrRoti;
-        if (a.presiuneRoti != NULL && a.nrRoti > 0) {
-            for (int i = 0; i < a.nrRoti; i++) {
-                automobil << a.presiuneRoti[i] << " ";
-            }
-        }
-        return automobil;
-    }
+    friend ostream& operator<<(ostream& automobil, const Automobil& a);
 
     ~Automobil() {
         if (this->marcaModel != NULL) {
@@ -173,10 +166,43 @@ public:
         }
     }
 
-
     friend float pretRoti(const Automobil& a);
+   
+    friend istream& operator>>(istream& in, Automobil& a) {
+        cout << "Introduceti marca automobilului: ";
+        char aux[100];
+        in >> aux;
+        if (a.marcaModel != NULL) {
+            delete[] a.marcaModel;
+        }
+
+        a.marcaModel = new char[strlen(aux) + 1];
+        strcpy_s(a.marcaModel, strlen(aux) + 1, aux);
+        cout << "Introduceti numarul de roti: ";
+        in >> a.nrRoti;
+        if (a.presiuneRoti != NULL) {
+            delete[] a.presiuneRoti;
+        }
+        a.presiuneRoti = new float[a.nrRoti];
+        for (int i = 0; i < a.nrRoti; i++) {
+            cout << "Introduceti presiunea rotii[" << i + 1 << "]: ";
+            in >> a.presiuneRoti[i];
+        }
+        return in;
+    }
+
+
 };
 int Automobil::nrAutomobile = 0;
+ostream& operator<<(ostream& automobil, const Automobil& a) {
+    automobil << "Marca: " << a.marcaModel << " ,Serie: " << a.nrSerie << ", Numar roti: " << a.nrRoti;
+    if (a.presiuneRoti != NULL && a.nrRoti > 0) {
+        for (int i = 0; i < a.nrRoti; i++) {
+            automobil << a.presiuneRoti[i] << " ";
+        }
+    }
+    return automobil;
+}
 
 float pretRoti(const Automobil& a) {
     return a.nrRoti * 100;
@@ -240,21 +266,17 @@ public:
         return *this;
     }
 
-    friend ostream& operator<<(ostream& tren, const Tren& t) {
-        tren << "Model: " << t.model << " ,Numar vagoane: " << t.nrVagoane << ", Culoare: " << t.culoare << " , Numarul maxim de pasageri: " << t.nrMaximPasageri;
-        
-        return tren;
-    }
+
     bool operator!=(const Tren& t) {
         return this->nrVagoane != t.nrVagoane;
-   }
+    }
     Tren& operator+=(const Tren& t) {
         this->nrVagoane += t.nrVagoane;
         return *this;
     }
 
     ~Tren() {
-        if (culoare != NULL) {
+        if (this->culoare != NULL) {
             delete[]this->culoare;
         }
     }
@@ -287,10 +309,33 @@ public:
     void setNrVagoane(int nrVagoane) {
         this->nrVagoane = nrVagoane;
     }
+    friend ostream& operator<<(ostream& tren, const Tren& t);
+    friend istream& operator>>(istream& in, Tren& t) {
+        cout << "Introduceti modelul trenului: ";
+        in >> t.model;
+        cout << "Introduceti numarul vagoanelor: ";
+        in >> t.nrVagoane;
+        cout << "Introduceti culoarea trenului: ";
+        char aux[100];
+        in >> aux;
+        if (t.culoare != NULL) {
+            delete[]t.culoare;
+        }
+
+        t.culoare = new char[strlen(aux) + 1];
+        strcpy_s(t.culoare, strlen(aux) + 1, aux);
+
+
+        return in;
+    }
 };
 
 int Tren::nrTotalTrenuri = 0;
+ostream& operator<<(ostream& tren, const Tren& t) {
+    tren << "Model: " << t.model << " ,Numar vagoane: " << t.nrVagoane << ", Culoare: " << t.culoare << " , Numarul maxim de pasageri: " << t.nrMaximPasageri;
 
+    return tren;
+}
 
 class Vapor {
 private:
@@ -354,27 +399,24 @@ public:
         return *this;
     }
 
-    friend ostream& operator<<(ostream& vapor, const Vapor& v) {
-        vapor << "Nume: " << v.numeVapor << " ,Destinatie: " << v.destinatie << ", Capacitate pasageri: " << v.capacitatePasageri << " , An fabricare: " << v.anFabricare << (v.vaporDeMarfa ? " ,Vapor de marfa." : " ,Vapor de pasageri.");
+    friend ostream& operator<<(ostream& vapor, const Vapor& v);
 
-        return vapor;
-    }
-    
+
     string operator()(string denumire) {
         return this->destinatie + denumire;
     }
     friend istream& operator>>(istream& ist, Vapor& v) {
         char aux[100];
-        cout << "Nume: ";
+        cout << "Introduceti numele vaporului: ";
         ist >> aux;
         if (v.numeVapor != NULL) {
             delete[]v.numeVapor;
         }
-        v.numeVapor= new char[strlen(aux) + 1];
+        v.numeVapor = new char[strlen(aux) + 1];
         strcpy_s(v.numeVapor, strlen(aux) + 1, aux);
-        cout << "Destinatie: ";
+        cout << "Introduceti destinatia: ";
         ist >> v.destinatie;
-        cout << "Capacitate pasagerilor este de: ";
+        cout << "Introduceti capacitatea pasagerilor: ";
         ist >> v.capacitatePasageri;
         cout << "Este vapor de marfa (1-Da, 0-Nu): ";
         ist >> v.vaporDeMarfa;
@@ -382,7 +424,7 @@ public:
     }
     bool operator>(const Vapor& v) {
         return this->capacitatePasageri > v.capacitatePasageri;
-       }
+    }
 
     ~Vapor() {
         if (numeVapor != NULL) {
@@ -425,11 +467,17 @@ public:
     }
 
     friend float costCroaziera(const Vapor& v);
+
 };
 int Vapor::nrVapoare = 0;
 
 float costCroaziera(const Vapor& v) {
     return v.capacitatePasageri * 200;
+}
+ostream& operator<<(ostream& vapor, const Vapor& v) {
+    vapor << "Nume: " << v.numeVapor << " ,Destinatie: " << v.destinatie << ", Capacitate pasageri: " << v.capacitatePasageri << " , An fabricare: " << v.anFabricare << (v.vaporDeMarfa ? " ,Vapor de marfa." : " ,Vapor de pasageri.");
+
+    return vapor;
 }
 
 
@@ -558,9 +606,9 @@ void main() {
     cout << "Operatorii clasei Automobil:" << endl;
     cout << automobil2 << endl;
     automobil2 = automobil3;
-    cout << automobil2 << endl;  
+    cout << automobil2 << endl;
     cout << endl;
-    cout << "Suma presiunilor la roti este de: "<< (float)automobil3 << endl;
+    cout << "Suma presiunilor la roti este de: " << (float)automobil3 << endl;
     cout << automobil3[1] << endl;
     automobil3[1] = 30.2;
     cout << automobil3[1] << endl;
@@ -580,11 +628,60 @@ void main() {
     cout << vapor3 << endl;
     vapor1 = vapor2;
     cout << vapor1 << endl;
-     cout << vapor2(" Island") << endl;
+    cout << vapor2(" Island") << endl;
     cout << endl;
-    cout << "Vaporul3 are capacitatea pasagerilor mai mare decat  vaporul2? " << ((vapor3 > vapor2) ? "Da" : "Nu") << endl;
+    cout << "Vaporul3 are capacitatea pasagerilor mai mare decat vaporul2? " << ((vapor3 > vapor2) ? "Da" : "Nu") << endl;
     cout << endl;
     cout << vapor2 << endl;
     cin >> vapor2;
     cout << vapor2;
+
+    cout << endl << endl;
+    cout << "---------------------------------------------------------" << endl;
+    Automobil* vectorAuto = new Automobil[2];
+    Tren* vectorTren = new Tren[2];
+    Vapor* vectorVapor = new Vapor[2];
+    for (int i = 0; i < 2; i++) {
+        cin >> vectorAuto[i];
+    }
+    cout << endl;
+    for (int i = 0; i < 2; i++) {
+        cout << vectorAuto[i]<< endl;
+    }
+
+    cout << endl << endl << endl;
+    for (int i = 0; i < 2; i++) {
+        cin >> vectorTren[i];
+    }
+    cout << endl;
+    for (int i = 0; i < 2; i++) {
+        cout << vectorTren[i] << endl;
+    }
+
+    cout << endl << endl << endl;
+
+    for (int i = 0; i < 2; i++) {
+        cin >> vectorVapor[i];
+    }
+    cout << endl;
+    for (int i = 0; i < 2; i++) {
+        cout << vectorVapor[i] << endl;
+    }
+    
+    cout << endl << endl << endl;
+    int randuri = 2;
+    int coloane = 2;
+    Automobil matriceAutomobil[2][2];
+    for (int i = 0; i < randuri; ++i) {
+        for (int j = 0; j < coloane; ++j) {
+            cout << "Introduceti informatii pentru automobilul[" << i  << "]:\n ";
+            cin >> matriceAutomobil[i][j];
+        }
+    }
+    for (int i = 0; i < randuri; ++i) {
+        for (int j = 0; j < coloane; ++j) {
+            cout << "Automobilul [" << i << "][" << j << "]:\n " << matriceAutomobil[i][j] << "\n";
+            
+        }
+    }
 }
