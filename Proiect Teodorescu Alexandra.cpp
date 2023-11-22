@@ -167,7 +167,7 @@ public:
     }
 
     friend float pretRoti(const Automobil& a);
-   
+
     friend istream& operator>>(istream& in, Automobil& a) {
         cout << "Introduceti marca automobilului: ";
         char aux[100];
@@ -480,7 +480,139 @@ ostream& operator<<(ostream& vapor, const Vapor& v) {
     return vapor;
 }
 
+class Parcare {
+    int nrLocuri;
+    string denumireParcare;
+    float pret;
+    int nrAutomobile;
+    Automobil* automobile;
+public:
+    Parcare() {
+        this->nrLocuri = 56;
+        this->denumireParcare = "Zona A";
+        this->pret = 3;
+        this->nrAutomobile = 0;
+        this->automobile = NULL;
+    }
+    Parcare(int nrLocuri, string denumireParcare, float pret, int nrAutomobile, Automobil* automobile) {
+        this->nrLocuri = nrLocuri;
+        this->denumireParcare = denumireParcare;
+        this->pret = pret;
+        this->nrAutomobile = nrAutomobile;
+        if (nrAutomobile > 0) {
 
+            this->automobile = new Automobil[nrAutomobile];
+            for (int i = 0; i < nrAutomobile; i++) {
+                this->automobile[i] = automobile[i];
+            }
+        }
+        else {
+            this->automobile = NULL;
+        }
+    }
+    Parcare(const Parcare& p) {
+        this->nrLocuri = p.nrLocuri;
+        this->denumireParcare = p.denumireParcare;
+        this->pret = p.pret;
+        this->nrAutomobile = p.nrAutomobile;
+        if (p.nrAutomobile > 0) {
+            this->automobile = new Automobil[p.nrAutomobile];
+            for (int i = 0; i < p.nrAutomobile; i++) {
+                this->automobile[i] = p.automobile[i];
+            }
+        }
+        else {
+            this->automobile = NULL;
+
+        }
+    }
+
+    Parcare& operator=(const Parcare& p) {
+        if (this != &p) {
+            delete[]automobile;
+            this->nrLocuri = p.nrLocuri;
+            this->denumireParcare = p.denumireParcare;
+            this->pret = p.pret;
+            this->nrAutomobile = p.nrAutomobile;
+            if (p.nrAutomobile > 0) {
+                this->automobile = new Automobil[p.nrAutomobile];
+                for (int i = 0; i < p.nrAutomobile; i++) {
+                    this->automobile[i] = p.automobile[i];
+                }
+            }
+            else {
+                this->automobile = NULL;
+
+            }
+        }
+        return *this;
+    }
+    ~Parcare() {
+        delete[]this->automobile;
+    }
+
+    int getNrLocuri() {
+        return this->nrLocuri;
+    }
+    string getDenumireParcare() {
+        return this->denumireParcare;
+
+    }
+    float getPret() {
+        return this->pret;
+
+    }
+    int getNrAutomobile() {
+        return this->nrAutomobile;
+    }
+    Automobil* getAutomobile() {
+        return this->automobile;
+    }
+    void setNrLocuri(int nrLocuri) {
+        this->nrLocuri = nrLocuri;
+    }
+    void setDenumireParcare(string denumireParcare) {
+        this->denumireParcare = denumireParcare;
+
+    }
+    void setPret(float pret) {
+        this->pret = pret;
+
+    }
+    void setAutomobile(int nrAutomobile, Automobil* automobile) {
+        if (nrAutomobile > 0) {
+            delete[]this->automobile;
+            this->automobile = new Automobil[this->nrAutomobile];
+            for (int i = 0; i < this->nrAutomobile; i++) {
+                this->automobile[i] = automobile[i];
+            }
+        }
+
+    }
+
+    friend ostream& operator<<(ostream& au, const Parcare& p) {
+        au << "Numaru locurilor din parcare: " << p.nrLocuri << endl;
+        au << "Denumire parcare: " << p.denumireParcare << endl;
+        au << "Pret parcare: " << p.pret << " lei/h" << endl;
+        au << "Numar automobile: " << p.nrAutomobile << endl;
+        au << "Automobile: " << endl;
+        for (int i = 0; i < p.nrAutomobile; i++) {
+            au << p.automobile[i] << endl;
+        }
+        return au;
+    }
+
+    bool operator>(Parcare p) {
+        return(this->denumireParcare.size() > p.denumireParcare.size());
+    }
+    Parcare& operator+=(float val) {
+        this->pret += val;
+        return *this;
+    }
+    explicit operator int() {
+        return this->nrLocuri;
+    }
+};
 
 
 
@@ -646,7 +778,7 @@ void main() {
     }
     cout << endl;
     for (int i = 0; i < 2; i++) {
-        cout << vectorAuto[i]<< endl;
+        cout << vectorAuto[i] << endl;
     }
 
     cout << endl << endl << endl;
@@ -667,21 +799,79 @@ void main() {
     for (int i = 0; i < 2; i++) {
         cout << vectorVapor[i] << endl;
     }
-    
+
     cout << endl << endl << endl;
+
     int randuri = 2;
     int coloane = 2;
     Automobil matriceAutomobil[2][2];
     for (int i = 0; i < randuri; ++i) {
         for (int j = 0; j < coloane; ++j) {
-            cout << "Introduceti informatii pentru automobilul[" << i  << "]:\n ";
+            cout << "Introduceti informatii pentru automobilul[" << i << "]:\n ";
             cin >> matriceAutomobil[i][j];
         }
     }
     for (int i = 0; i < randuri; ++i) {
         for (int j = 0; j < coloane; ++j) {
             cout << "Automobilul [" << i << "][" << j << "]:\n " << matriceAutomobil[i][j] << "\n";
-            
+
         }
     }
+
+
+    cout << "----------------------------------------------------------------------------" << endl;
+    Parcare p;
+    cout << p.getNrLocuri() << endl;
+    cout << p.getPret() << endl;
+    cout << p.getDenumireParcare() << endl;
+    cout << p.getNrAutomobile() << endl;
+    for (int i = 0; i < p.getNrAutomobile(); i++) {
+        cout << p.getAutomobile()[i] << endl;
+    }
+    Automobil vectorA[] = { automobil2 };
+    Parcare p1(45, "Zona C", 2, 1, vectorA);
+    cout << p1.getNrLocuri() << endl;
+    cout << p1.getPret() << endl;
+    cout << p1.getDenumireParcare() << endl;
+    cout << p1.getNrAutomobile() << endl;
+    for (int i = 0; i < p1.getNrAutomobile(); i++) {
+        cout << p1.getAutomobile()[i] << endl;
+    }
+    Automobil vectorAu[] = { automobil1 };
+
+    p1.setPret(5);
+    p1.setNrLocuri(67);
+    p1.setDenumireParcare("Zona S");
+    p1.setAutomobile(1, vectorAu);
+    cout << endl;
+    cout << p1.getNrLocuri() << endl;
+    cout << p1.getPret() << endl;
+    cout << p1.getDenumireParcare() << endl;
+    cout << p1.getNrAutomobile() << endl;
+    for (int i = 0; i < p1.getNrAutomobile(); i++) {
+        cout << p1.getAutomobile()[i] << endl;
+    }
+    cout << endl;
+    Automobil vectAu[] = { automobil1,automobil3 };
+
+    Parcare p2(78, "Zona K2", 6, 2, vectAu);
+    Parcare p3 = p1;
+    cout << p3 << endl << endl;
+    p = p2;
+    cout << p << endl;
+    cout << endl << endl;
+    if (p2 > p1) {
+        cout << "Adevarat";
+
+    }
+    else {
+        cout << "Fals";
+    }
+
+    cout << endl << endl;
+    p2 += 2;
+    cout << p2 << endl;
+    cout << endl;
+    cout << (int)p3 << endl;
+
 }
