@@ -1,6 +1,6 @@
-
 #include <iostream>
 #include<string>
+#include<fstream>
 #define CRT_SECURE_NO_WARNINGS
 using namespace std;
 //Teodorescu Alexandra->Domeniul este TrAnsporturi
@@ -19,7 +19,7 @@ public:
         return nrAutomobile;
 
     }
-    Automobil() :nrSerie("N/A") {
+    Automobil() :nrSerie("RTV23") {
         nrAutomobile++;
         this->marcaModel = new char[strlen("Skoda") + 1];
         strcpy_s(this->marcaModel, strlen("Skoda") + 1, "Skoda");
@@ -126,7 +126,7 @@ public:
     }
 
 
-    const string& getNrSerie() {
+    const string getNrSerie() {
         return this->nrSerie;
     }
 
@@ -190,16 +190,49 @@ public:
         }
         return in;
     }
+    friend ifstream& operator>>(ifstream& in, Automobil& a) {
+        char buffer[100];
+        in >> buffer;
+        if (a.marcaModel != NULL) {
+            delete[] a.marcaModel;
+        }
 
-
+        a.marcaModel = new char[strlen(buffer) + 1];
+        strcpy_s(a.marcaModel, strlen(buffer) + 1, buffer);
+        in >> a.nrRoti;
+        if (a.presiuneRoti != NULL) {
+            delete[] a.presiuneRoti;
+        }
+        a.presiuneRoti = new float[a.nrRoti];
+        for (int i = 0; i < a.nrRoti; i++) {
+            in >> a.presiuneRoti[i];
+        }
+        return in;
+    }
+    friend ofstream& operator<<(ofstream& automobil, const Automobil& a) {
+        automobil << a.marcaModel << endl;
+        automobil << a.nrRoti << endl;
+        if (a.presiuneRoti != NULL && a.nrRoti > 0) {
+            for (int i = 0; i < a.nrRoti; i++) {
+                automobil << a.presiuneRoti[i] << " ";
+            }
+        }
+        else {
+            cout << "-";
+        }
+        return automobil;
+    }
 };
 int Automobil::nrAutomobile = 0;
 ostream& operator<<(ostream& automobil, const Automobil& a) {
-    automobil << "Marca: " << a.marcaModel << " ,Serie: " << a.nrSerie << ", Numar roti: " << a.nrRoti;
+    automobil << "Marca: " << a.marcaModel << ", Numar roti: " << a.nrRoti << ", presiune roti: ";
     if (a.presiuneRoti != NULL && a.nrRoti > 0) {
         for (int i = 0; i < a.nrRoti; i++) {
             automobil << a.presiuneRoti[i] << " ";
         }
+    }
+    else {
+        cout << "-";
     }
     return automobil;
 }
@@ -328,11 +361,43 @@ public:
 
         return in;
     }
+    void scrieInFisierBinar(string numeFisier) {
+        ofstream t(numeFisier, ios::out | ios::binary);
+
+        int dimModel = this->model.size();
+        t.write((char*)&dimModel, sizeof(int));
+        t.write(this->model.c_str(), dimModel + 1);
+        t.write((char*)&this->nrVagoane, sizeof(int));
+        int lungime = strlen(this->culoare);
+        t.write((char*)&lungime, sizeof(int));
+        t.write((char*)this->culoare, lungime + 1);
+        t.close();
+    }
+    void citireInFisierBinar(string numeFisier) {
+        ifstream t(numeFisier, ios::in | ios::binary);
+
+        if (this->culoare != NULL) {
+            delete[]this->culoare;
+        }
+        int dimModel;
+        t.read((char*)&dimModel, sizeof(int));
+        char* aux = new char[dimModel + 1];
+        t.read(aux, dimModel + 1);
+        this->model = aux;
+        delete[]aux;
+        t.read((char*)&this->nrVagoane, sizeof(int));
+        int lungime;
+        t.read((char*)&lungime, sizeof(int));
+        this->culoare = new char[lungime + 1];
+        t.read(this->culoare, lungime + 1);
+        t.close();
+    }
+
 };
 
 int Tren::nrTotalTrenuri = 0;
 ostream& operator<<(ostream& tren, const Tren& t) {
-    tren << "Model: " << t.model << " ,Numar vagoane: " << t.nrVagoane << ", Culoare: " << t.culoare << " , Numarul maxim de pasageri: " << t.nrMaximPasageri;
+    tren << "Model: " << t.model << " ,Numar vagoane: " << t.nrVagoane << ", Culoare: " << t.culoare;
 
     return tren;
 }
@@ -422,6 +487,38 @@ public:
         ist >> v.vaporDeMarfa;
         return ist;
     }
+    void scriere(string numeFisier) {
+        ofstream v(numeFisier, ios::out | ios::binary);
+        int lungime = strlen(this->numeVapor);
+        v.write((char*)&lungime, sizeof(int));
+        v.write((char*)this->numeVapor, lungime + 1);
+        int dimDestinatie = this->destinatie.size();
+        v.write((char*)&dimDestinatie, sizeof(int));
+        v.write(this->destinatie.c_str(), dimDestinatie + 1);
+        v.write((char*)&this->capacitatePasageri, sizeof(int));
+        v.write((char*)&this->vaporDeMarfa, sizeof(bool));
+        v.close();
+    }
+    void citire(string numeFisier) {
+        ifstream v(numeFisier, ios::in | ios::binary);
+
+        if (this->numeVapor != NULL) {
+            delete[]this->numeVapor;
+        }
+        int lungime;
+        v.read((char*)&lungime, sizeof(int));
+        this->numeVapor = new char[lungime + 1];
+        v.read(this->numeVapor, lungime + 1);
+        int dimDestinatie;
+        v.read((char*)&dimDestinatie, sizeof(int));
+        char* aux = new char[dimDestinatie + 1];
+        v.read(aux, dimDestinatie + 1);
+        this->destinatie = aux;
+        delete[]aux;
+        v.read((char*)&this->capacitatePasageri, sizeof(int));
+        v.read((char*)&this->vaporDeMarfa, sizeof(bool));
+        v.close();
+    }
     bool operator>(const Vapor& v) {
         return this->capacitatePasageri > v.capacitatePasageri;
     }
@@ -475,7 +572,7 @@ float costCroaziera(const Vapor& v) {
     return v.capacitatePasageri * 200;
 }
 ostream& operator<<(ostream& vapor, const Vapor& v) {
-    vapor << "Nume: " << v.numeVapor << " ,Destinatie: " << v.destinatie << ", Capacitate pasageri: " << v.capacitatePasageri << " , An fabricare: " << v.anFabricare << (v.vaporDeMarfa ? " ,Vapor de marfa." : " ,Vapor de pasageri.");
+    vapor << "Nume: " << v.numeVapor << " ,Destinatie: " << v.destinatie << ", Capacitate pasageri: " << v.capacitatePasageri << (v.vaporDeMarfa ? " ,Vapor de marfa." : " ,Vapor de pasageri.");
 
     return vapor;
 }
@@ -591,17 +688,86 @@ public:
     }
 
     friend ostream& operator<<(ostream& au, const Parcare& p) {
-        au << "Numaru locurilor din parcare: " << p.nrLocuri << endl;
+        au << "Numarul locurilor din parcare: " << p.nrLocuri << endl;
         au << "Denumire parcare: " << p.denumireParcare << endl;
         au << "Pret parcare: " << p.pret << " lei/h" << endl;
         au << "Numar automobile: " << p.nrAutomobile << endl;
         au << "Automobile: " << endl;
-        for (int i = 0; i < p.nrAutomobile; i++) {
-            au << p.automobile[i] << endl;
+        if (p.nrAutomobile > 0) {
+            for (int i = 0; i < p.nrAutomobile; i++) {
+                au << p.automobile[i] << endl;
+            }
+        }
+        else {
+            cout << "-" << endl;
         }
         return au;
     }
 
+    friend istream& operator>>(istream& in, Parcare& p) {
+        cout << "Introduceti numarul locurilor din parcare : " << endl;
+        in >> p.nrLocuri;
+        cout << "Introduceti denumirea parcarii: " << endl;
+        in >> ws;
+        getline(in, p.denumireParcare);
+        cout << "Introduceti pret parcare: " << endl;
+        in >> p.pret;
+        cout << "Introduceti numarul automobilelor: " << endl;
+        in >> p.nrAutomobile;
+        if (p.nrAutomobile > 0) {
+            delete[]p.automobile;
+            p.automobile = new Automobil[p.nrAutomobile];
+            for (int i = 0; i < p.nrAutomobile; i++) {
+                cout << "Introduceti automobilul de pe pozitia [" << i + 1 << "]: ";
+                in >> p.automobile[i];
+            }
+
+        }
+        else {
+            p.nrAutomobile = NULL;
+        }
+
+
+        return in;
+    }
+    friend ofstream& operator<<(ofstream& au, const Parcare& p) {
+        au << p.nrLocuri << endl;
+        au << p.denumireParcare << endl;
+        au << p.pret << endl;
+        au << p.nrAutomobile << endl;
+        if (p.nrAutomobile > 0) {
+            for (int i = 0; i < p.nrAutomobile; i++) {
+                au << p.automobile[i] << endl;
+            }
+
+        }
+        else {
+            cout << "-" << endl;
+
+        }
+        return au;
+    }
+    friend ifstream& operator>>(ifstream& in, Parcare& p) {
+        in >> p.nrLocuri;
+        in >> ws;
+        getline(in, p.denumireParcare);
+        in >> p.pret;
+        in >> p.nrAutomobile;
+        if (p.nrAutomobile > 0) {
+            delete[]p.automobile;
+            p.automobile = new Automobil[p.nrAutomobile];
+            for (int i = 0; i < p.nrAutomobile; i++) {
+                in >> p.automobile[i];
+            }
+
+        }
+        else {
+            p.nrAutomobile = NULL;
+        }
+
+
+        return in;
+    }
     bool operator>(Parcare p) {
         return(this->denumireParcare.size() > p.denumireParcare.size());
     }
@@ -873,5 +1039,43 @@ void main() {
     cout << p2 << endl;
     cout << endl;
     cout << (int)p3 << endl;
+
+     cin >> p2;
+     cout << p2 << endl;
+    cout << endl << endl;
+    cout << "Fisiere Text" << endl;
+    cout << endl;
+     ofstream par("parcare.txt", ios::out);
+     par << p2;
+     par.close();
+
+     Parcare parcare1;
+     ifstream citireParcare("parcare.txt", ios::in);
+     citireParcare >> parcare1;
+     cout << parcare1;
+     citireParcare.close();
+
+    ofstream au("automobil.txt", ios::out);
+    au << automobil3;
+    au.close();
+
+    cout << endl;
+    Automobil automobil5;
+    ifstream citireAutomobil("automobil.txt", ios::in);
+    citireAutomobil >> automobil5;
+    cout << automobil5<<endl;
+    citireAutomobil.close();
+    cout << endl;
+    cout << "Fisere Binare" << endl;
+
+    tren2.scrieInFisierBinar("trenuri.binar");
+    Tren tBinar;
+    tBinar.citireInFisierBinar("trenuri.binar");
+    cout << tBinar << endl;
+    cout << endl << endl;
+    vapor3.scriere("vapoare.binar");
+    Vapor vBinar;
+    vBinar.citire("vapoare.binar");
+    cout << vBinar<< endl;
 
 }
