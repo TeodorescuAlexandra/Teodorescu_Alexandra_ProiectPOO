@@ -10,7 +10,7 @@ private:
 
     static int nrAutomobile;
     const string nrSerie;
-    char* marcaModel;
+    char* marca;
     int nrRoti;
     float* presiuneRoti;
 public:
@@ -21,23 +21,23 @@ public:
     }
     Automobil() :nrSerie("RTV23") {
         nrAutomobile++;
-        this->marcaModel = new char[strlen("Skoda") + 1];
-        strcpy_s(this->marcaModel, strlen("Skoda") + 1, "Skoda");
+        this->marca = new char[strlen("Skoda") + 1];
+        strcpy_s(this->marca, strlen("Skoda") + 1, "Skoda");
         this->presiuneRoti = NULL;
         this->nrRoti = 0;
     }
-    Automobil(const char* marcaModel, string nrSerie, int nrRoti) :nrSerie(nrSerie) {
+    Automobil(const char* marca, string nrSerie) :nrSerie(nrSerie) {
         nrAutomobile++;
-        this->nrRoti = nrRoti;
-        this->marcaModel = new char[strlen(marcaModel) + 1];
-        strcpy_s(this->marcaModel, strlen(marcaModel) + 1, marcaModel);
+        this->nrRoti = 0;
+        this->marca = new char[strlen(marca) + 1];
+        strcpy_s(this->marca, strlen(marca) + 1, marca);
         this->presiuneRoti = NULL;
 
     }
-    Automobil(const char* marcaModel, string nrSerie, int nrRoti, float* presiuneRoti) : nrSerie(nrSerie) {
+    Automobil(const char* marca, string nrSerie, int nrRoti, float* presiuneRoti) : nrSerie(nrSerie) {
         nrAutomobile++;
-        this->marcaModel = new char[strlen(marcaModel) + 1];
-        strcpy_s(this->marcaModel, strlen(marcaModel) + 1, marcaModel);
+        this->marca = new char[strlen(marca) + 1];
+        strcpy_s(this->marca, strlen(marca) + 1, marca);
         this->nrRoti = nrRoti;
         this->presiuneRoti = new float[nrRoti];
         for (int i = 0; i < nrRoti; i++) {
@@ -46,8 +46,8 @@ public:
 
     }
     Automobil(const Automobil& a) :nrSerie(a.nrSerie) {
-        this->marcaModel = new char[strlen(a.marcaModel) + 1];
-        strcpy_s(this->marcaModel, strlen(a.marcaModel) + 1, a.marcaModel);
+        this->marca = new char[strlen(a.marca) + 1];
+        strcpy_s(this->marca, strlen(a.marca) + 1, a.marca);
         this->nrRoti = a.nrRoti;
         if (nrRoti > 0) {
             this->presiuneRoti = new float[a.nrRoti];
@@ -64,11 +64,11 @@ public:
 
     Automobil& operator=(const Automobil& a) {
         if (this != &a) {
-            if (this->marcaModel != NULL) {
-                delete[]this->marcaModel;
+            if (this->marca != NULL) {
+                delete[]this->marca;
             }
-            this->marcaModel = new char[strlen(a.marcaModel) + 1];
-            strcpy_s(this->marcaModel, strlen(a.marcaModel) + 1, a.marcaModel);
+            this->marca = new char[strlen(a.marca) + 1];
+            strcpy_s(this->marca, strlen(a.marca) + 1, a.marca);
             this->nrRoti = a.nrRoti;
             if (this->presiuneRoti != NULL) {
                 delete[]this->presiuneRoti;
@@ -101,8 +101,8 @@ public:
     friend ostream& operator<<(ostream& automobil, const Automobil& a);
 
     ~Automobil() {
-        if (this->marcaModel != NULL) {
-            delete[] this->marcaModel;
+        if (this->marca != NULL) {
+            delete[] this->marca;
         }
         if (this->presiuneRoti != NULL) {
             delete[] this->presiuneRoti;
@@ -111,7 +111,7 @@ public:
     }
     void afisareAutomobil() {
 
-        cout << "Automobilul " << marcaModel << " cu seria " << nrSerie << " are " << nrRoti << " roti." << endl;
+        cout << "Automobilul " << marca << " cu seria " << nrSerie << " are " << nrRoti << " roti." << endl;
         if (presiuneRoti) {
             cout << "Presiunea rotilor este de: ";
             for (int i = 0; i < nrRoti; i++) {
@@ -130,8 +130,8 @@ public:
         return this->nrSerie;
     }
 
-    const char* getMarcaModel() {
-        return this->marcaModel;
+    const char* getMarca() {
+        return this->marca;
 
     }
 
@@ -143,12 +143,12 @@ public:
         return this->presiuneRoti;
     }
 
-    void setMarcaModel(const char* marcaModel) {
-        if (this->marcaModel) {
-            delete[] this->marcaModel;
+    void setMarca(const char* marca) {
+        if (this->marca) {
+            delete[] this->marca;
         }
-        this->marcaModel = new char[strlen(marcaModel) + 1];
-        strcpy_s(this->marcaModel, strlen(marcaModel) + 1, marcaModel);
+        this->marca = new char[strlen(marca) + 1];
+        strcpy_s(this->marca, strlen(marca) + 1, marca);
 
 
     }
@@ -172,12 +172,12 @@ public:
         cout << "Introduceti marca automobilului: ";
         char aux[100];
         in >> aux;
-        if (a.marcaModel != NULL) {
-            delete[] a.marcaModel;
+        if (a.marca != NULL) {
+            delete[] a.marca;
         }
 
-        a.marcaModel = new char[strlen(aux) + 1];
-        strcpy_s(a.marcaModel, strlen(aux) + 1, aux);
+        a.marca = new char[strlen(aux) + 1];
+        strcpy_s(a.marca, strlen(aux) + 1, aux);
         cout << "Introduceti numarul de roti: ";
         in >> a.nrRoti;
         if (a.presiuneRoti != NULL) {
@@ -193,12 +193,12 @@ public:
     friend ifstream& operator>>(ifstream& in, Automobil& a) {
         char buffer[100];
         in >> buffer;
-        if (a.marcaModel != NULL) {
-            delete[] a.marcaModel;
+        if (a.marca != NULL) {
+            delete[] a.marca;
         }
 
-        a.marcaModel = new char[strlen(buffer) + 1];
-        strcpy_s(a.marcaModel, strlen(buffer) + 1, buffer);
+        a.marca = new char[strlen(buffer) + 1];
+        strcpy_s(a.marca, strlen(buffer) + 1, buffer);
         in >> a.nrRoti;
         if (a.presiuneRoti != NULL) {
             delete[] a.presiuneRoti;
@@ -210,7 +210,7 @@ public:
         return in;
     }
     friend ofstream& operator<<(ofstream& automobil, const Automobil& a) {
-        automobil << a.marcaModel << endl;
+        automobil << a.marca << endl;
         automobil << a.nrRoti << endl;
         if (a.presiuneRoti != NULL && a.nrRoti > 0) {
             for (int i = 0; i < a.nrRoti; i++) {
@@ -225,7 +225,7 @@ public:
 };
 int Automobil::nrAutomobile = 0;
 ostream& operator<<(ostream& automobil, const Automobil& a) {
-    automobil << "Marca: " << a.marcaModel << ", Numar roti: " << a.nrRoti << ", presiune roti: ";
+    automobil << "Marca: " << a.marca << ", Numar roti: " << a.nrRoti << ", presiune roti: ";
     if (a.presiuneRoti != NULL && a.nrRoti > 0) {
         for (int i = 0; i < a.nrRoti; i++) {
             automobil << a.presiuneRoti[i] << " ";
@@ -780,13 +780,206 @@ public:
     }
 };
 
+class SUV : public Automobil {
+private:
+    float capacitatePortbagaj;
+    int nrViteze;
+    bool electric;
+public:
+    SUV() : Automobil() {
+        this->capacitatePortbagaj = 345.34;
+        this->nrViteze = 5;
+        this->electric = true;
+    }
+    SUV(float capacitatePortbagaj, int nrViteze, bool electric, const char* marca, string nrSerie) : Automobil(marca, nrSerie) {
+        this->capacitatePortbagaj = capacitatePortbagaj;
+        this->nrViteze = nrViteze;
+        this->electric = electric;
+    }
+    SUV(float capacitatePortbagaj, int nrViteze, bool electric, const char* marca, string nrSerie, int nrRoti, float* presiuneRoti) : Automobil(marca, nrSerie, nrRoti, presiuneRoti) {
+        this->capacitatePortbagaj = capacitatePortbagaj;
+        this->nrViteze = nrViteze;
+        this->electric = electric;
+    }
+    float getCapacitatePortbagaj() {
+        return this->capacitatePortbagaj;
+    }
+    void setCapacitatePortbagaj(float capacitatePortbagaj) {
+        this->capacitatePortbagaj = capacitatePortbagaj;
+    }
+    int getNrViteze() {
+        return this->nrViteze;
+    }
+    void setNrViteze(int nrViteze) {
+        this->nrViteze = nrViteze;
+    }
+    bool getElectric() {
+        return this->electric;
+    }
+    void setElectric(bool electric) {
+        this->electric = electric;
+    }
+    ~SUV() {
+
+    }
+
+    SUV(const SUV& suv) :Automobil(suv) {
+        this->capacitatePortbagaj = suv.capacitatePortbagaj;
+        this->nrViteze = suv.nrViteze;
+        this->electric = suv.electric;
+    }
+    SUV& operator=(const SUV& suv) {
+        if (this != &suv) {
+            Automobil::operator=(suv);
+            this->capacitatePortbagaj = suv.capacitatePortbagaj;
+            this->nrViteze = suv.nrViteze;
+            this->electric = suv.electric;
+        }
+        return *this;
+    }
+    friend ostream& operator<<(ostream& out, const SUV& suv) {
+        out << (Automobil)suv;
+        out << ", Capacitatea portbagajului: " << suv.capacitatePortbagaj << ", Numar viteze: " << suv.nrViteze << (suv.electric ? ", Este electrica." : ", Este manuala.");
+        return out;
+    }
+
+};
+
+class Feribot :Vapor {
+private:
+    int capacitateVehicule;
+    string sistemDeDescarcare;
+    int numarServicii;
+    string* serviciiLaBord;
+public:
+    Feribot() :Vapor() {
+        this->capacitateVehicule = 66;
+        this->sistemDeDescarcare = "Rampe automate";
+        this->numarServicii = 0;
+        this->serviciiLaBord = NULL;
+    }
+    Feribot(const char* numeVapor, string destinatie, int anFabricare, int capacitateVehicule, string sistemDeDescarcare, int numarServicii, string* serviciiLaBord) :Vapor(numeVapor, destinatie, anFabricare) {
+        this->capacitateVehicule = capacitateVehicule;
+        this->sistemDeDescarcare = sistemDeDescarcare;
+        this->numarServicii = numarServicii;
+        if (this->numarServicii > 0) {
+            this->serviciiLaBord = new string[numarServicii];
+            for (int i = 0; i < this->numarServicii; i++) {
+                this->serviciiLaBord[i] = serviciiLaBord[i];
+            }
+        }
+        else {
+            this->serviciiLaBord = NULL;
+        }
+    }
+    Feribot(const char* numeVapor, string destinatie, int capacitatePasageri, int anFabricare, bool vaporDeMarfa, int capacitateVehicule, string sistemDeDescarcare, int numarServicii, string* serviciiLaBord) :Vapor(numeVapor, destinatie, capacitatePasageri, anFabricare, vaporDeMarfa) {
+        this->capacitateVehicule = capacitateVehicule;
+        this->sistemDeDescarcare = sistemDeDescarcare;
+        this->numarServicii = numarServicii;
+        if (this->numarServicii > 0) {
+            this->serviciiLaBord = new string[numarServicii];
+            for (int i = 0; i < this->numarServicii; i++) {
+                this->serviciiLaBord[i] = serviciiLaBord[i];
+            }
+        }
+        else {
+            this->serviciiLaBord = NULL;
+
+        }
+    }
+    int getCapacitateVehicule() {
+        return this->capacitateVehicule;
+    }
+    void setCapacitateVehicule(int capacitateVehicule) {
+        this->capacitateVehicule = capacitateVehicule;
+    }
+    string getSistemDeDescarcare() {
+        return this->sistemDeDescarcare;
+    }
+    void setSistemDeDescarcare(string sistemDeDescarcare) {
+        this->sistemDeDescarcare = sistemDeDescarcare;
+    }
+    int getNumarServicii() {
+        return this->numarServicii;
+    }
+    string* getServiciiLaBord() {
+        return this->serviciiLaBord;
+    }
+    void setServicii(int numarServicii, string* serviciiLaBord) {
+        this->numarServicii = numarServicii;
+        if (this->numarServicii > 0) {
+            if (serviciiLaBord != NULL) {
+                delete[]this->serviciiLaBord;
+            }
+            this->serviciiLaBord = new string[numarServicii];
+            for (int i = 0; i < this->numarServicii; i++) {
+                this->serviciiLaBord[i] = serviciiLaBord[i];
+            }
+        }
+        else {
+            this->serviciiLaBord = NULL;
+        }
+
+    }
+    ~Feribot() {
+        if (serviciiLaBord != NULL) {
+            delete[]this->serviciiLaBord;
+        }
+    }
+    Feribot(const Feribot& fer) :Vapor(fer) {
+        this->capacitateVehicule = fer.capacitateVehicule;
+        this->sistemDeDescarcare = fer.sistemDeDescarcare;
+        this->numarServicii = fer.numarServicii;
+        if (this->numarServicii > 0) {
+            this->serviciiLaBord = new string[fer.numarServicii];
+            for (int i = 0; i < fer.numarServicii; i++) {
+                this->serviciiLaBord[i] = fer.serviciiLaBord[i];
+            }
+        }
+        else {
+            this->serviciiLaBord = NULL;
+        }
+    }
+    Feribot& operator=(const Feribot& fer) {
+        if (this != &fer) {
+            Vapor:: operator=(fer);
+            this->capacitateVehicule = fer.capacitateVehicule;
+            this->sistemDeDescarcare = fer.sistemDeDescarcare;
+            this->numarServicii = fer.numarServicii;
+            if (this->numarServicii > 0) {
+                this->serviciiLaBord = new string[fer.numarServicii];
+                for (int i = 0; i < fer.numarServicii; i++) {
+                    this->serviciiLaBord[i] = fer.serviciiLaBord[i];
+                }
+            }
+            else {
+                this->serviciiLaBord = NULL;
+            }
+        }
+        return *this;
+    }
+    friend ostream& operator<<(ostream& out, const Feribot& fer) {
+        out << (Vapor)fer;
+        out << ", Capacitatea vehiculelor: " << fer.capacitateVehicule << ", Sistem de descarcare: " << fer.sistemDeDescarcare << ", Numar servicii: " << fer.numarServicii;
+        if (fer.numarServicii > 0) {
+            out << ", servicii: ";
+            for (int i = 0; i < fer.numarServicii; i++) {
+                cout << fer.serviciiLaBord[i] << " ";
+            }
+        }
+        else {
+            cout << "-";
+        }
+        return out;
+    }
 
 
+};
 void main() {
 
     Automobil automobil1;
     automobil1.afisareAutomobil();
-    Automobil automobil2("Suzuki", "SVR3", 4);
+    Automobil automobil2("Suzuki", "SVR3");
     automobil2.afisareAutomobil();
     float* presiuneRoti = new float[4] { 35.5, 36.0, 34.8, 35.2 };
     Automobil automobil3("Mercedes", "CDR3", 4, presiuneRoti);
@@ -826,7 +1019,7 @@ void main() {
     auto1.afisareAutomobil();
     cout << endl << endl;
     cout << auto1.getNrSerie() << endl;
-    cout << auto1.getMarcaModel() << endl;
+    cout << auto1.getMarca() << endl;
     cout << auto1.getNrRoti() << endl;
     for (int i = 0; i < auto1.getNrRoti(); i++) {
         cout << auto1.getPresiuneRoti()[i] << ",";
@@ -835,14 +1028,14 @@ void main() {
     cout << "Pretul rotilor este de:" << pretRoti(auto1) << " lei." << endl;
     cout << endl;
 
-    auto1.setMarcaModel("Renault Captur");
+    auto1.setMarca("Renault Captur");
     float* presiuneR = new float[4] { 37.0, 36.2, 35.6, 36.4 };
     auto1.setPresiuneRoti(4, presiuneR);
     cout << endl;
     auto1.afisareAutomobil();
     cout << endl << endl;
     cout << auto1.getNrSerie() << endl;
-    cout << auto1.getMarcaModel() << endl;
+    cout << auto1.getMarca() << endl;
     cout << auto1.getNrRoti() << endl;
     for (int i = 0; i < auto1.getNrRoti(); i++) {
         cout << auto1.getPresiuneRoti()[i] << " ";
@@ -949,7 +1142,7 @@ void main() {
 
     cout << endl << endl << endl;
     for (int i = 0; i < 2; i++) {
-        cin >> vectorTren[i];
+        //cin >> vectorTren[i];
     }
     cout << endl;
     for (int i = 0; i < 2; i++) {
@@ -1040,20 +1233,20 @@ void main() {
     cout << endl;
     cout << (int)p3 << endl;
 
-     cin >> p2;
-     cout << p2 << endl;
+    cin >> p2;
+    cout << p2 << endl;
     cout << endl << endl;
     cout << "Fisiere Text" << endl;
     cout << endl;
-     ofstream par("parcare.txt", ios::out);
-     par << p2;
-     par.close();
+    ofstream par("parcare.txt", ios::out);
+    par << p2;
+    par.close();
 
-     Parcare parcare1;
-     ifstream citireParcare("parcare.txt", ios::in);
-     citireParcare >> parcare1;
-     cout << parcare1;
-     citireParcare.close();
+    Parcare parcare1;
+    ifstream citireParcare("parcare.txt", ios::in);
+    citireParcare >> parcare1;
+    cout << parcare1;
+    citireParcare.close();
 
     ofstream au("automobil.txt", ios::out);
     au << automobil3;
@@ -1063,7 +1256,7 @@ void main() {
     Automobil automobil5;
     ifstream citireAutomobil("automobil.txt", ios::in);
     citireAutomobil >> automobil5;
-    cout << automobil5<<endl;
+    cout << automobil5 << endl;
     citireAutomobil.close();
     cout << endl;
     cout << "Fisere Binare" << endl;
@@ -1076,6 +1269,51 @@ void main() {
     vapor3.scriere("vapoare.binar");
     Vapor vBinar;
     vBinar.citire("vapoare.binar");
-    cout << vBinar<< endl;
+    cout << vBinar << endl;
+
+
+    cout << endl << endl << endl;
+    cout << "Mostenirea: " << endl;
+    SUV suv;
+    cout << suv.getCapacitatePortbagaj() << endl;
+    cout << suv.getNrViteze() << endl;
+    cout << suv.getElectric() << endl;
+    suv.setCapacitatePortbagaj(322.44);
+    suv.setNrViteze(6);
+    suv.setElectric(false);
+
+    cout << suv << endl;
+    cout << endl;
+    SUV suv1(555.44, 5, true, "Hyundai", "34GFR");
+    cout << suv1 << endl;
+    cout << endl;
+    SUV suv2 = suv;
+    cout << suv2 << endl;
+
+    suv2 = suv1;
+    cout << suv2 << endl;
+
+    cout << endl << endl << endl;
+
+    Feribot f;
+    cout << f.getCapacitateVehicule() << endl;
+    cout << f.getSistemDeDescarcare() << endl;
+    cout << f.getNumarServicii() << endl;
+    cout << f.getServiciiLaBord() << endl;
+    f.setCapacitateVehicule(78);
+    f.setSistemDeDescarcare("Ponton automat");
+    string* serviciiFer = new string[2]{ "cafenea ","wi-fi gratuit" };
+    f.setServicii(2, serviciiFer);
+    cout << f << endl;
+    string* servicii = new string[3]{ "loc de joaca ","bar ","wi-fi gratuit" };
+    Feribot f1("Water High", "Jamaica", 2016, 55, "Rampe manuale", 3, servicii);
+    cout << f1 << endl;
+    cout << endl;
+    Feribot f2 = f;
+    cout << f2 << endl;
+    cout << endl;
+    f2 = f1;
+    cout << f2<< endl;
+
 
 }
