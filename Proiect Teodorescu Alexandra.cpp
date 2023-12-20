@@ -3,39 +3,43 @@
 #include<fstream>
 #define CRT_SECURE_NO_WARNINGS
 using namespace std;
+
 //Teodorescu Alexandra->Domeniul este TrAnsporturi
 
-class Automobil {
-private:
+class AutomobilAbstract
+{
+public:
+    virtual void printMarca() = 0;
+    virtual void printRoti() = 0;
+};
 
-    static int nrAutomobile;
+class Automobil : public AutomobilAbstract{
+private:
     const string nrSerie;
     char* marca;
     int nrRoti;
     float* presiuneRoti;
+    static float TVA;
+
 public:
 
-    static int getNrAutomobile() {
-        return nrAutomobile;
-
-    }
+    //constr fara parametrii
     Automobil() :nrSerie("RTV23") {
-        nrAutomobile++;
         this->marca = new char[strlen("Skoda") + 1];
         strcpy_s(this->marca, strlen("Skoda") + 1, "Skoda");
         this->presiuneRoti = NULL;
         this->nrRoti = 0;
     }
+    //constr cu 2 parametrii
     Automobil(const char* marca, string nrSerie) :nrSerie(nrSerie) {
-        nrAutomobile++;
         this->nrRoti = 0;
         this->marca = new char[strlen(marca) + 1];
         strcpy_s(this->marca, strlen(marca) + 1, marca);
         this->presiuneRoti = NULL;
 
     }
+    //constr cu toti parametrii
     Automobil(const char* marca, string nrSerie, int nrRoti, float* presiuneRoti) : nrSerie(nrSerie) {
-        nrAutomobile++;
         this->marca = new char[strlen(marca) + 1];
         strcpy_s(this->marca, strlen(marca) + 1, marca);
         this->nrRoti = nrRoti;
@@ -45,6 +49,7 @@ public:
         }
 
     }
+    //constr de copiere
     Automobil(const Automobil& a) :nrSerie(a.nrSerie) {
         this->marca = new char[strlen(a.marca) + 1];
         strcpy_s(this->marca, strlen(a.marca) + 1, a.marca);
@@ -58,10 +63,9 @@ public:
         else {
             this->presiuneRoti = NULL;
         }
-
-
     }
 
+    //op=
     Automobil& operator=(const Automobil& a) {
         if (this != &a) {
             if (this->marca != NULL) {
@@ -81,6 +85,8 @@ public:
         }
         return *this;
     }
+
+    //op de cast la float
     explicit operator float() {
         float s = 0;
         for (int i = 0; i < this->nrRoti; i++)
@@ -90,16 +96,26 @@ public:
         return s;
 
     }
-
+    //op de indexare
     float& operator[](int pozitie) {
         if (pozitie >= 0 && pozitie < this->nrRoti) {
             return this->presiuneRoti[pozitie];
         }
-
     }
 
-    friend ostream& operator<<(ostream& automobil, const Automobil& a);
-
+    //metoda prin care comparam nr de roti
+    bool comparaNrRoti(Automobil& a)
+    {
+        if (this->nrRoti >= a.nrRoti)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    //destructor
     ~Automobil() {
         if (this->marca != NULL) {
             delete[] this->marca;
@@ -109,6 +125,7 @@ public:
         }
 
     }
+    //functie de afisare
     void afisareAutomobil() {
 
         cout << "Automobilul " << marca << " cu seria " << nrSerie << " are " << nrRoti << " roti." << endl;
@@ -124,8 +141,7 @@ public:
         }
 
     }
-
-
+    //getteri si setteri
     const string getNrSerie() {
         return this->nrSerie;
     }
@@ -141,6 +157,10 @@ public:
 
     float* getPresiuneRoti() {
         return this->presiuneRoti;
+    }
+
+    static float getTVA() {
+        return Automobil::TVA;
     }
 
     void setMarca(const char* marca) {
@@ -168,6 +188,7 @@ public:
 
     friend float pretRoti(const Automobil& a);
 
+    //op>>
     friend istream& operator>>(istream& in, Automobil& a) {
         cout << "Introduceti marca automobilului: ";
         char aux[100];
@@ -190,6 +211,7 @@ public:
         }
         return in;
     }
+    //citirea din fisier text
     friend ifstream& operator>>(ifstream& in, Automobil& a) {
         char buffer[100];
         in >> buffer;
@@ -209,6 +231,7 @@ public:
         }
         return in;
     }
+    //scrierea in fisier text
     friend ofstream& operator<<(ofstream& automobil, const Automobil& a) {
         automobil << a.marca << endl;
         automobil << a.nrRoti << endl;
@@ -222,70 +245,91 @@ public:
         }
         return automobil;
     }
-};
-int Automobil::nrAutomobile = 0;
-ostream& operator<<(ostream& automobil, const Automobil& a) {
-    automobil << "Marca: " << a.marca << ", Numar roti: " << a.nrRoti << ", presiune roti: ";
-    if (a.presiuneRoti != NULL && a.nrRoti > 0) {
-        for (int i = 0; i < a.nrRoti; i++) {
-            automobil << a.presiuneRoti[i] << " ";
+    //op<<
+    friend ostream& operator<<(ostream& automobil, const Automobil& a) {
+        automobil << "Marca: " << a.marca << ", Numar roti: " << a.nrRoti << ", presiune roti: ";
+        if (a.presiuneRoti != NULL && a.nrRoti > 0) {
+            for (int i = 0; i < a.nrRoti; i++) {
+                automobil << a.presiuneRoti[i] << " ";
+            }
+        }
+        else {
+            cout << "-";
+        }
+        return automobil;
+    }
+
+
+
+
+    //redefinire functii virtual pure
+    virtual void printMarca()
+    {
+        cout << "Marca automobilului este: " << this->marca << endl;
+    }
+    virtual void printRoti()
+    {
+        cout << "Nr de roti este: " << this->nrRoti << endl;
+        cout << "Presiunea rotilor este: " << endl;
+        for (int i = 0; i < this->nrRoti; i++)
+        {
+            cout << this->presiuneRoti[i] << endl;
         }
     }
-    else {
-        cout << "-";
-    }
-    return automobil;
-}
+};
+float Automobil::TVA = 0.19;
 
 float pretRoti(const Automobil& a) {
     return a.nrRoti * 100;
 }
 
+class MachetaTren
+{
+public:
+    virtual void returnCuloare() = 0;
+    virtual void returnModel() = 0;
+};
 
-class Tren {
-private:
+class Tren :public MachetaTren
+{
+
+    static int nrSoferi;
     const int nrMaximPasageri;
-    static int nrTotalTrenuri;
     string model;
     int nrVagoane;
     char* culoare;
 
 public:
-    static int getNrTotalTrenuri() {
-        return nrTotalTrenuri;
-    }
 
+    //constr fara parametrii
     Tren() : nrMaximPasageri(234) {
         this->model = "Speedy";
         this->nrVagoane = 4;
         this->culoare = new char[strlen("Albastru") + 1];
         strcpy_s(this->culoare, strlen("Albastru") + 1, "Albastru");
-        nrTotalTrenuri++;
     }
-
+    //constr cu 2 parametrii
     Tren(string model, const char* culoare) : nrMaximPasageri(0) {
         this->model = model;
         this->nrVagoane = 4;
         this->culoare = new char[strlen(culoare) + 1];
         strcpy_s(this->culoare, strlen(culoare) + 1, culoare);
-        nrTotalTrenuri++;
     }
-
+    //constr cu toti parametrii
     Tren(const char* culoare, string model, int nrVagoane, int nrMaximPasageri) : nrMaximPasageri(nrMaximPasageri) {
         this->model = model;
         this->nrVagoane = nrVagoane;
         this->culoare = new char[strlen(culoare) + 1];
         strcpy_s(this->culoare, strlen(culoare) + 1, culoare);
-        nrTotalTrenuri++;
     }
-
+    //constr de copiere
     Tren(const Tren& t) :nrMaximPasageri(t.nrMaximPasageri) {
         this->model = t.model;
         this->nrVagoane = t.nrVagoane;
         this->culoare = new char[strlen(t.culoare) + 1];
         strcpy_s(this->culoare, strlen(t.culoare) + 1, t.culoare);
     }
-
+    //op=
     Tren operator=(const Tren& t) {
         if (this != &t) {
             this->model = t.model;
@@ -299,27 +343,29 @@ public:
         return *this;
     }
 
-
+    //op+=
     bool operator!=(const Tren& t) {
         return this->nrVagoane != t.nrVagoane;
     }
-    Tren& operator+=(const Tren& t) {
-        this->nrVagoane += t.nrVagoane;
-        return *this;
-    }
 
+    //op ()
+    void operator()(int nrVagoaneSuplimentare)
+    {
+        this->nrVagoane = this->nrVagoane + nrVagoaneSuplimentare;
+    }
+    //destructor
     ~Tren() {
         if (this->culoare != NULL) {
             delete[]this->culoare;
         }
     }
-
+    //functie afisare
     void afisareInfoTren() {
         cout << "Trenul " << model << " are:  " << nrVagoane << " vagoane ,culoarea: " << culoare << " si numarul maxim de pasageri : " << nrMaximPasageri << "." << endl;
 
     }
-
-    int getNrMaximPasageri() {
+    //getteri si setteri
+    const int getNrMaximPasageri() {
         return this->nrMaximPasageri;
     }
     char* getCuloare() {
@@ -342,7 +388,15 @@ public:
     void setNrVagoane(int nrVagoane) {
         this->nrVagoane = nrVagoane;
     }
-    friend ostream& operator<<(ostream& tren, const Tren& t);
+
+    static void setNrSoferi(int nrSoferi) {
+        Tren::nrSoferi = nrSoferi;
+    }
+
+    static float getNrSoferi() {
+        return Tren::nrSoferi;
+    }
+    //op>>
     friend istream& operator>>(istream& in, Tren& t) {
         cout << "Introduceti modelul trenului: ";
         in >> t.model;
@@ -361,62 +415,72 @@ public:
 
         return in;
     }
-    void scrieInFisierBinar(string numeFisier) {
-        ofstream t(numeFisier, ios::out | ios::binary);
 
-        int dimModel = this->model.size();
-        t.write((char*)&dimModel, sizeof(int));
-        t.write(this->model.c_str(), dimModel + 1);
-        t.write((char*)&this->nrVagoane, sizeof(int));
-        int lungime = strlen(this->culoare);
-        t.write((char*)&lungime, sizeof(int));
-        t.write((char*)this->culoare, lungime + 1);
-        t.close();
+    friend ostream& operator<<(ostream& tren, const Tren& t) {
+        tren << "Model: " << t.model << " ,Numar vagoane: " << t.nrVagoane << ", Culoare: " << t.culoare;
+
+        return tren;
     }
-    void citireInFisierBinar(string numeFisier) {
-        ifstream t(numeFisier, ios::in | ios::binary);
-
-        if (this->culoare != NULL) {
-            delete[]this->culoare;
+    //fisiere binare
+    void scriereInFisierBinar(fstream& file)
+    {
+        int nrLitereModel = this->model.size();
+        file.write((char*)&nrLitereModel, sizeof(int));
+        file.write(this->model.c_str(), nrLitereModel);
+        file.write((char*)&this->nrVagoane, sizeof(int));
+        int nrLitereCuloare = strlen(this->culoare);
+        file.write((char*)&nrLitereCuloare, sizeof(int));
+        for (int i = 0; i < nrLitereCuloare; i++)
+        {
+            file.write((char*)&this->culoare[i], sizeof(char));
         }
-        int dimModel;
-        t.read((char*)&dimModel, sizeof(int));
-        char* aux = new char[dimModel + 1];
-        t.read(aux, dimModel + 1);
+    }
+    void citireInFisierBinar(fstream& file)
+    {
+        delete[]this->culoare;
+        int nrLitereModel;
+        file.read((char*)&nrLitereModel, sizeof(int));
+        string aux;
+        aux.resize(nrLitereModel);
+        file.read((char*)aux.c_str(), nrLitereModel);
         this->model = aux;
-        delete[]aux;
-        t.read((char*)&this->nrVagoane, sizeof(int));
-        int lungime;
-        t.read((char*)&lungime, sizeof(int));
-        this->culoare = new char[lungime + 1];
-        t.read(this->culoare, lungime + 1);
-        t.close();
+        file.read((char*)&this->nrVagoane, sizeof(int));
+        int nrLitereCuloare;
+        file.read((char*)&nrLitereCuloare, sizeof(int));
+        this->culoare = new char[nrLitereCuloare + 1];
+        for (int i = 0; i < nrLitereCuloare; i++)
+        {
+            file.read((char*)&this->culoare[i], sizeof(char));
+        }
+        this->culoare[nrLitereCuloare] = '\0';
     }
 
+
+
+    //redefinire functii virtual pure
+    void returnCuloare()
+    {
+        cout << "Culoarea trenului este: " << this->culoare << endl;
+    }
+    void returnModel()
+    {
+        cout << "Modelul trenului este: " << this->model << endl;
+    }
 };
 
-int Tren::nrTotalTrenuri = 0;
-ostream& operator<<(ostream& tren, const Tren& t) {
-    tren << "Model: " << t.model << " ,Numar vagoane: " << t.nrVagoane << ", Culoare: " << t.culoare;
-
-    return tren;
-}
+int Tren::nrSoferi = 2;
 
 class Vapor {
-private:
-    static int nrVapoare;
+    static float impozitProfit;
     const int anFabricare;
     char* numeVapor;
     string destinatie;
     int capacitatePasageri;
     bool vaporDeMarfa;
 public:
-
-    static int getNrVapoare() {
-        return nrVapoare;
-    }
+    //constr fara parametrii
     Vapor() :anFabricare(0) {
-        nrVapoare++;
+
         this->numeVapor = new char[strlen("Aqua") + 1];
         strcpy_s(this->numeVapor, strlen("Aqua") + 1, "Aqua");
         this->destinatie = "Thassos";
@@ -424,32 +488,31 @@ public:
         this->vaporDeMarfa = false;
 
     }
+    //constr cu 3 parametrii
     Vapor(const char* numeVapor, string destinatie, int anFabricare) :anFabricare(anFabricare) {
-        nrVapoare++;
         this->numeVapor = new char[strlen(numeVapor) + 1];
         strcpy_s(this->numeVapor, strlen(numeVapor) + 1, numeVapor);
         this->destinatie = destinatie;
         this->capacitatePasageri = 8312;
         this->vaporDeMarfa = false;
     }
+    //constr cu toti parametrii
     Vapor(const char* numeVapor, string destinatie, int capacitatePasageri, int anFabricare, bool vaporDeMarfa) :anFabricare(anFabricare) {
-        nrVapoare++;
         this->numeVapor = new char[strlen(numeVapor) + 1];
         strcpy_s(this->numeVapor, strlen(numeVapor) + 1, numeVapor);
         this->destinatie = destinatie;
         this->capacitatePasageri = capacitatePasageri;
         this->vaporDeMarfa = vaporDeMarfa;
     }
-
+    //constr de copiere
     Vapor(const Vapor& v) :anFabricare(v.anFabricare) {
         this->numeVapor = new char[strlen(v.numeVapor) + 1];
         strcpy_s(this->numeVapor, strlen(v.numeVapor) + 1, v.numeVapor);
         this->destinatie = v.destinatie;
         this->capacitatePasageri = v.capacitatePasageri;
         this->vaporDeMarfa = v.vaporDeMarfa;
-
-
     }
+    //op=
     Vapor operator=(const Vapor& v) {
         if (this != &v) {
             if (numeVapor != NULL) {
@@ -464,76 +527,31 @@ public:
         return *this;
     }
 
-    friend ostream& operator<<(ostream& vapor, const Vapor& v);
-
-
     string operator()(string denumire) {
         return this->destinatie + denumire;
     }
-    friend istream& operator>>(istream& ist, Vapor& v) {
-        char aux[100];
-        cout << "Introduceti numele vaporului: ";
-        ist >> aux;
-        if (v.numeVapor != NULL) {
-            delete[]v.numeVapor;
-        }
-        v.numeVapor = new char[strlen(aux) + 1];
-        strcpy_s(v.numeVapor, strlen(aux) + 1, aux);
-        cout << "Introduceti destinatia: ";
-        ist >> v.destinatie;
-        cout << "Introduceti capacitatea pasagerilor: ";
-        ist >> v.capacitatePasageri;
-        cout << "Este vapor de marfa (1-Da, 0-Nu): ";
-        ist >> v.vaporDeMarfa;
-        return ist;
-    }
-    void scriere(string numeFisier) {
-        ofstream v(numeFisier, ios::out | ios::binary);
-        int lungime = strlen(this->numeVapor);
-        v.write((char*)&lungime, sizeof(int));
-        v.write((char*)this->numeVapor, lungime + 1);
-        int dimDestinatie = this->destinatie.size();
-        v.write((char*)&dimDestinatie, sizeof(int));
-        v.write(this->destinatie.c_str(), dimDestinatie + 1);
-        v.write((char*)&this->capacitatePasageri, sizeof(int));
-        v.write((char*)&this->vaporDeMarfa, sizeof(bool));
-        v.close();
-    }
-    void citire(string numeFisier) {
-        ifstream v(numeFisier, ios::in | ios::binary);
 
-        if (this->numeVapor != NULL) {
-            delete[]this->numeVapor;
-        }
-        int lungime;
-        v.read((char*)&lungime, sizeof(int));
-        this->numeVapor = new char[lungime + 1];
-        v.read(this->numeVapor, lungime + 1);
-        int dimDestinatie;
-        v.read((char*)&dimDestinatie, sizeof(int));
-        char* aux = new char[dimDestinatie + 1];
-        v.read(aux, dimDestinatie + 1);
-        this->destinatie = aux;
-        delete[]aux;
-        v.read((char*)&this->capacitatePasageri, sizeof(int));
-        v.read((char*)&this->vaporDeMarfa, sizeof(bool));
-        v.close();
-    }
+    //op>
     bool operator>(const Vapor& v) {
         return this->capacitatePasageri > v.capacitatePasageri;
     }
 
+
+
+    //destructor
     ~Vapor() {
         if (numeVapor != NULL) {
             delete[]this->numeVapor;
         }
 
     }
+    //functie afisare
     void afisareVapor() {
         cout << "Vaporul " << numeVapor << " cu destinatia: " << destinatie << " are " << capacitatePasageri << " pasageri. Este fabricat in anul " << anFabricare << " si este : " << (vaporDeMarfa ? "vapor de marfa." : "vapor de pasageri.") << endl;
 
     }
-    int getAnFabricare() {
+    //getteri si setteri
+    const int getAnFabricare() {
         return this->anFabricare;
     }
     char* getNumeVapor() {
@@ -562,28 +580,109 @@ public:
     void setVaporDeMarfa(bool vaporDeMarfa) {
         this->vaporDeMarfa = vaporDeMarfa;
     }
+    static void setImpozitProfit(float impozitProfit)
+    {
+        Vapor::impozitProfit = impozitProfit;
+    }
+
+    static float getImpozitProfit() {
+        return Vapor::impozitProfit;
+    }
+    //op<<
+    friend ostream& operator<<(ostream& vapor, const Vapor& v) {
+        vapor << "Nume: " << v.numeVapor << " ,Destinatie: " << v.destinatie << ", Capacitate pasageri: " << v.capacitatePasageri << (v.vaporDeMarfa ? " ,Vapor de marfa." : " ,Vapor de pasageri.");
+
+        return vapor;
+    }
+
+    //op>>
+    friend istream& operator>>(istream& ist, Vapor& v) {
+        char aux[100];
+        cout << "Introduceti numele vaporului: ";
+        ist >> aux;
+        if (v.numeVapor != NULL) {
+            delete[]v.numeVapor;
+        }
+        v.numeVapor = new char[strlen(aux) + 1];
+        strcpy_s(v.numeVapor, strlen(aux) + 1, aux);
+        cout << "Introduceti destinatia: ";
+        ist >> v.destinatie;
+        cout << "Introduceti capacitatea pasagerilor: ";
+        ist >> v.capacitatePasageri;
+        cout << "Este vapor de marfa (1-Da, 0-Nu): ";
+        ist >> v.vaporDeMarfa;
+        return ist;
+    }
+
+    //fisiere binare
+
+    void scriereInFisierBinar(fstream& file)
+    {
+        int lungime = strlen(this->numeVapor);
+        file.write((char*)&lungime, sizeof(int));
+        for (int i = 0; i < lungime; i++)
+        {
+            file.write((char*)&this->numeVapor[i], sizeof(char));
+        }
+        int nrLitereDestinatie = this->destinatie.size();
+        file.write((char*)&nrLitereDestinatie, sizeof(int));
+        file.write(this->destinatie.c_str(), nrLitereDestinatie);
+        file.write((char*)&this->capacitatePasageri, sizeof(int));
+        file.write((char*)&this->vaporDeMarfa, sizeof(bool));
+    }
+
+    void citireInFisierBinar(fstream& file)
+    {
+        if (numeVapor != NULL) {
+            delete[]this->numeVapor;
+        }
+        int lungime;
+        file.read((char*)&lungime, sizeof(int));
+        this->numeVapor = new char[lungime + 1];
+        for (int i = 0; i < lungime; i++)
+        {
+            file.read((char*)&this->numeVapor[i], sizeof(char));
+        }
+        this->numeVapor[lungime] = '\0';
+        int nrLitereDestinatie;
+        file.read((char*)&nrLitereDestinatie, sizeof(int));
+        string aux;
+        aux.resize(nrLitereDestinatie);
+        file.read((char*)aux.c_str(), nrLitereDestinatie);
+        this->destinatie = aux;
+        file.read((char*)&this->capacitatePasageri, sizeof(int));
+        file.read((char*)&this->vaporDeMarfa, sizeof(bool));
+    }
 
     friend float costCroaziera(const Vapor& v);
 
+
 };
-int Vapor::nrVapoare = 0;
+float Vapor::impozitProfit = 0.25;
 
 float costCroaziera(const Vapor& v) {
     return v.capacitatePasageri * 200;
 }
-ostream& operator<<(ostream& vapor, const Vapor& v) {
-    vapor << "Nume: " << v.numeVapor << " ,Destinatie: " << v.destinatie << ", Capacitate pasageri: " << v.capacitatePasageri << (v.vaporDeMarfa ? " ,Vapor de marfa." : " ,Vapor de pasageri.");
-
-    return vapor;
-}
-
-class Parcare {
+class Parcare
+{
     int nrLocuri;
     string denumireParcare;
     float pret;
     int nrAutomobile;
     Automobil* automobile;
+    AutomobilAbstract* automobilAbstract;
 public:
+
+    //cream un constructor pentru obiectul abstract
+    Parcare(AutomobilAbstract* automobilAbstract) : automobilAbstract(automobilAbstract) {}
+
+    //apelarea metodelor din clasa abstracta
+    void metodaAbstracta()
+    {
+        automobilAbstract->printMarca();
+        automobilAbstract->printRoti();
+    }
+    //constr fara parametrii
     Parcare() {
         this->nrLocuri = 56;
         this->denumireParcare = "Zona A";
@@ -591,6 +690,7 @@ public:
         this->nrAutomobile = 0;
         this->automobile = NULL;
     }
+    //constr cu toti parametrii
     Parcare(int nrLocuri, string denumireParcare, float pret, int nrAutomobile, Automobil* automobile) {
         this->nrLocuri = nrLocuri;
         this->denumireParcare = denumireParcare;
@@ -607,6 +707,7 @@ public:
             this->automobile = NULL;
         }
     }
+    //constr de copiere
     Parcare(const Parcare& p) {
         this->nrLocuri = p.nrLocuri;
         this->denumireParcare = p.denumireParcare;
@@ -623,7 +724,7 @@ public:
 
         }
     }
-
+    //op=
     Parcare& operator=(const Parcare& p) {
         if (this != &p) {
             delete[]automobile;
@@ -644,10 +745,11 @@ public:
         }
         return *this;
     }
+    //destructor
     ~Parcare() {
         delete[]this->automobile;
     }
-
+    //getteri si setteri
     int getNrLocuri() {
         return this->nrLocuri;
     }
@@ -686,7 +788,7 @@ public:
         }
 
     }
-
+    //op<<
     friend ostream& operator<<(ostream& au, const Parcare& p) {
         au << "Numarul locurilor din parcare: " << p.nrLocuri << endl;
         au << "Denumire parcare: " << p.denumireParcare << endl;
@@ -703,7 +805,7 @@ public:
         }
         return au;
     }
-
+    //op>>
     friend istream& operator>>(istream& in, Parcare& p) {
         cout << "Introduceti numarul locurilor din parcare : " << endl;
         in >> p.nrLocuri;
@@ -730,6 +832,7 @@ public:
 
         return in;
     }
+    //scrierea in fisier text
     friend ofstream& operator<<(ofstream& au, const Parcare& p) {
         au << p.nrLocuri << endl;
         au << p.denumireParcare << endl;
@@ -747,6 +850,7 @@ public:
         }
         return au;
     }
+    //citirea din fisier text
     friend ifstream& operator>>(ifstream& in, Parcare& p) {
         in >> p.nrLocuri;
         in >> ws;
@@ -768,24 +872,35 @@ public:
 
         return in;
     }
+
+    //op>
     bool operator>(Parcare p) {
         return(this->denumireParcare.size() > p.denumireParcare.size());
     }
-    Parcare& operator+=(float val) {
-        this->pret += val;
-        return *this;
-    }
+    //op de cast la int
     explicit operator int() {
         return this->nrLocuri;
     }
+
+    //op index
+    Automobil& operator[](int index)
+    {
+        if (index >= 0 && index < this->nrAutomobile)
+        {
+            return this->automobile[index];
+        }
+    }
+    
+    
 };
 
 class SUV : public Automobil {
-private:
+
     float capacitatePortbagaj;
     int nrViteze;
     bool electric;
 public:
+    //constr fara parametrii
     SUV() : Automobil() {
         this->capacitatePortbagaj = 345.34;
         this->nrViteze = 5;
@@ -796,11 +911,13 @@ public:
         this->nrViteze = nrViteze;
         this->electric = electric;
     }
+    //constr cu toti parametrii
     SUV(float capacitatePortbagaj, int nrViteze, bool electric, const char* marca, string nrSerie, int nrRoti, float* presiuneRoti) : Automobil(marca, nrSerie, nrRoti, presiuneRoti) {
         this->capacitatePortbagaj = capacitatePortbagaj;
         this->nrViteze = nrViteze;
         this->electric = electric;
     }
+    //getteri si setteri
     float getCapacitatePortbagaj() {
         return this->capacitatePortbagaj;
     }
@@ -819,15 +936,17 @@ public:
     void setElectric(bool electric) {
         this->electric = electric;
     }
+    //destructor
     ~SUV() {
 
     }
-
+    //constr de copiere
     SUV(const SUV& suv) :Automobil(suv) {
         this->capacitatePortbagaj = suv.capacitatePortbagaj;
         this->nrViteze = suv.nrViteze;
         this->electric = suv.electric;
     }
+    //op=
     SUV& operator=(const SUV& suv) {
         if (this != &suv) {
             Automobil::operator=(suv);
@@ -837,33 +956,47 @@ public:
         }
         return *this;
     }
-    friend ostream& operator<<(ostream& out, const SUV& suv) {
-        out << (Automobil)suv;
+    //op<<
+    friend ostream& operator<<(ostream& out, SUV& suv) {
+        out << (Automobil&)suv;
         out << ", Capacitatea portbagajului: " << suv.capacitatePortbagaj << ", Numar viteze: " << suv.nrViteze << (suv.electric ? ", Este electrica." : ", Este manuala.");
         return out;
     }
-
+    //op>>
+    friend istream& operator>>(istream& in, SUV& s)
+    {
+        in >> (Automobil&)s;
+        cout << "Introduceti capacitatea portbagajului: " << endl;
+        in >> s.capacitatePortbagaj;
+        cout << "Introduceti nr de viteze: " << endl;
+        in >> s.nrViteze;
+        cout << "Introduceti daca este electric sau nu: " << endl;
+        in >> s.electric;
+        return in;
+    }
 };
 
-class Feribot :Vapor {
-private:
+class Feribot :public Vapor
+{
     int capacitateVehicule;
     string sistemDeDescarcare;
     int numarServicii;
     string* serviciiLaBord;
 public:
+    //constr fara parametrii
     Feribot() :Vapor() {
         this->capacitateVehicule = 66;
         this->sistemDeDescarcare = "Rampe automate";
         this->numarServicii = 0;
         this->serviciiLaBord = NULL;
     }
+
     Feribot(const char* numeVapor, string destinatie, int anFabricare, int capacitateVehicule, string sistemDeDescarcare, int numarServicii, string* serviciiLaBord) :Vapor(numeVapor, destinatie, anFabricare) {
         this->capacitateVehicule = capacitateVehicule;
         this->sistemDeDescarcare = sistemDeDescarcare;
         this->numarServicii = numarServicii;
         if (this->numarServicii > 0) {
-            this->serviciiLaBord = new string[numarServicii];
+            this->serviciiLaBord = new string[this->numarServicii];
             for (int i = 0; i < this->numarServicii; i++) {
                 this->serviciiLaBord[i] = serviciiLaBord[i];
             }
@@ -872,12 +1005,13 @@ public:
             this->serviciiLaBord = NULL;
         }
     }
+    //constr cu toti parametrii
     Feribot(const char* numeVapor, string destinatie, int capacitatePasageri, int anFabricare, bool vaporDeMarfa, int capacitateVehicule, string sistemDeDescarcare, int numarServicii, string* serviciiLaBord) :Vapor(numeVapor, destinatie, capacitatePasageri, anFabricare, vaporDeMarfa) {
         this->capacitateVehicule = capacitateVehicule;
         this->sistemDeDescarcare = sistemDeDescarcare;
         this->numarServicii = numarServicii;
         if (this->numarServicii > 0) {
-            this->serviciiLaBord = new string[numarServicii];
+            this->serviciiLaBord = new string[this->numarServicii];
             for (int i = 0; i < this->numarServicii; i++) {
                 this->serviciiLaBord[i] = serviciiLaBord[i];
             }
@@ -887,6 +1021,7 @@ public:
 
         }
     }
+    //getteri si setteri
     int getCapacitateVehicule() {
         return this->capacitateVehicule;
     }
@@ -911,7 +1046,7 @@ public:
             if (serviciiLaBord != NULL) {
                 delete[]this->serviciiLaBord;
             }
-            this->serviciiLaBord = new string[numarServicii];
+            this->serviciiLaBord = new string[this->numarServicii];
             for (int i = 0; i < this->numarServicii; i++) {
                 this->serviciiLaBord[i] = serviciiLaBord[i];
             }
@@ -921,11 +1056,13 @@ public:
         }
 
     }
+    //destructor
     ~Feribot() {
         if (serviciiLaBord != NULL) {
             delete[]this->serviciiLaBord;
         }
     }
+    //constr de copiere
     Feribot(const Feribot& fer) :Vapor(fer) {
         this->capacitateVehicule = fer.capacitateVehicule;
         this->sistemDeDescarcare = fer.sistemDeDescarcare;
@@ -940,6 +1077,7 @@ public:
             this->serviciiLaBord = NULL;
         }
     }
+    //op=
     Feribot& operator=(const Feribot& fer) {
         if (this != &fer) {
             Vapor:: operator=(fer);
@@ -958,6 +1096,7 @@ public:
         }
         return *this;
     }
+    //op<<
     friend ostream& operator<<(ostream& out, const Feribot& fer) {
         out << (Vapor)fer;
         out << ", Capacitatea vehiculelor: " << fer.capacitateVehicule << ", Sistem de descarcare: " << fer.sistemDeDescarcare << ", Numar servicii: " << fer.numarServicii;
@@ -973,7 +1112,6 @@ public:
         return out;
     }
 
-
 };
 void main() {
 
@@ -985,7 +1123,7 @@ void main() {
     Automobil automobil3("Mercedes", "CDR3", 4, presiuneRoti);
     automobil3.afisareAutomobil();
     cout << endl;
-    cout << "Numar total de automobile: " << Automobil::getNrAutomobile() << endl;
+    cout << "TVA: " << Automobil::getTVA() << endl;
 
     cout << endl << endl;
 
@@ -995,9 +1133,10 @@ void main() {
     tren1.afisareInfoTren();
     tren2.afisareInfoTren();
     tren3.afisareInfoTren();
-
-    cout << "Numar total de trenuri este: " << Tren::getNrTotalTrenuri() << endl;
-
+    cout << endl;
+    cout << "Nr Soferi: " << Tren::getNrSoferi() << endl;
+    Tren::setNrSoferi(1);
+    cout << "Nr Soferi: " << Tren::getNrSoferi() << endl;
 
     cout << endl << endl;
 
@@ -1007,10 +1146,13 @@ void main() {
     vapor2.afisareVapor();
     Vapor vapor3("Magisitc Marine", "Bora Bora", 3467, 2021, false);
     vapor3.afisareVapor();
+    cout << endl;
+    cout << "Impozit Pe Profit: " << Vapor::getImpozitProfit() << endl;
+    Vapor::setImpozitProfit(0.45);
+    cout << "Impozit Pe Profit: " << Vapor::getImpozitProfit() << endl;
 
-    cout << "Numar total de vapoare este: " << Vapor::getNrVapoare() << endl;
-    cout << endl << endl;
-
+  
+    
 
     cout << "================================================================= " << endl;
     cout << "Getteri si setteri:" << endl << endl;
@@ -1022,12 +1164,9 @@ void main() {
     cout << auto1.getMarca() << endl;
     cout << auto1.getNrRoti() << endl;
     for (int i = 0; i < auto1.getNrRoti(); i++) {
-        cout << auto1.getPresiuneRoti()[i] << ",";
+        cout << auto1.getPresiuneRoti()[i] << " ";
     }
-    cout << endl << endl;
-    cout << "Pretul rotilor este de:" << pretRoti(auto1) << " lei." << endl;
     cout << endl;
-
     auto1.setMarca("Renault Captur");
     float* presiuneR = new float[4] { 37.0, 36.2, 35.6, 36.4 };
     auto1.setPresiuneRoti(4, presiuneR);
@@ -1040,7 +1179,10 @@ void main() {
     for (int i = 0; i < auto1.getNrRoti(); i++) {
         cout << auto1.getPresiuneRoti()[i] << " ";
     }
+    cout << endl << endl;
+    cout << "Pretul rotilor este de:" << pretRoti(auto1) << " lei." << endl;
     cout << endl;
+
     cout << "==============================================================" << endl;
 
     Tren t1 = tren3;
@@ -1089,10 +1231,9 @@ void main() {
     cout << v1.getDestinatie() << endl;
     cout << v1.getNumeVapor() << endl;
     cout << v1.getVaporDeMarfa() << endl;
-
-    delete[]presiuneRoti;
-    delete[]presiuneR;
     cout << endl << endl;
+
+    
     cout << "==========================================================================================================" << endl;
     cout << "Operatorii clasei Automobil:" << endl;
     cout << automobil2 << endl;
@@ -1103,6 +1244,9 @@ void main() {
     cout << automobil3[1] << endl;
     automobil3[1] = 30.2;
     cout << automobil3[1] << endl;
+    cout << "Comparare roti: " ;
+    cout << automobil3.comparaNrRoti(auto1) << endl << endl;
+
     cout << endl;
 
     cout << "Operatorii clasei Tren:" << endl;
@@ -1111,8 +1255,8 @@ void main() {
     cout << "Trenul1 are numarul de vagoane diferit de trenul2? " << ((tren1 != tren2) ? "Da" : "Nu") << endl;
     tren2 = tren3;
     cout << tren2 << endl;
-    tren1 += tren2;
-    cout << tren1 << endl;
+    tren2(3);
+    cout << tren2 << endl;
     cout << endl;
 
     cout << "Operatorii clasei Vapor:" << endl;
@@ -1126,6 +1270,8 @@ void main() {
     cout << vapor2 << endl;
     cin >> vapor2;
     cout << vapor2;
+
+
 
     cout << endl << endl;
     cout << "---------------------------------------------------------" << endl;
@@ -1153,6 +1299,7 @@ void main() {
 
     for (int i = 0; i < 2; i++) {
         cin >> vectorVapor[i];
+
     }
     cout << endl;
     for (int i = 0; i < 2; i++) {
@@ -1219,6 +1366,7 @@ void main() {
     p = p2;
     cout << p << endl;
     cout << endl << endl;
+    cout << "Operatorii clasei parcare: " << endl << endl;
     if (p2 > p1) {
         cout << "Adevarat";
 
@@ -1226,12 +1374,9 @@ void main() {
     else {
         cout << "Fals";
     }
-
-    cout << endl << endl;
-    p2 += 2;
-    cout << p2 << endl;
     cout << endl;
     cout << (int)p3 << endl;
+    cout << p2[0] << endl << endl;
 
     cin >> p2;
     cout << p2 << endl;
@@ -1259,17 +1404,31 @@ void main() {
     cout << automobil5 << endl;
     citireAutomobil.close();
     cout << endl;
-    cout << "Fisere Binare" << endl;
+    cout << "Fisiere binare Tren: " << endl << endl;
 
-    tren2.scrieInFisierBinar("trenuri.binar");
-    Tren tBinar;
-    tBinar.citireInFisierBinar("trenuri.binar");
-    cout << tBinar << endl;
-    cout << endl << endl;
-    vapor3.scriere("vapoare.binar");
-    Vapor vBinar;
-    vBinar.citire("vapoare.binar");
-    cout << vBinar << endl;
+    fstream file1("TrenFisierBinar.bin", ios::binary | ios::out);
+    tren1.scriereInFisierBinar(file1);
+    file1.close();
+
+    fstream file2("TrenFisierBinar.bin", ios::binary | ios::in);
+    t1.citireInFisierBinar(file2);
+    file2.close();
+
+    cout << tren1 << endl << endl;
+    cout << t1 << endl << endl;
+
+    cout << "Fisiere binare Vapor:" << endl << endl;
+
+    fstream file3("VaporFisierBinar.bin", ios::binary | ios::out);
+    vapor3.scriereInFisierBinar(file3);
+    file3.close();
+
+    fstream file4("VaporFisierBinar.bin", ios::binary | ios::in);
+    vapor1.scriereInFisierBinar(file4);
+    file4.close();
+
+    cout << vapor3 << endl << endl;
+    cout << vapor1 << endl << endl;
 
 
     cout << endl << endl << endl;
@@ -1295,6 +1454,12 @@ void main() {
 
     cout << endl << endl << endl;
 
+    cout << "Upcasting" << endl << endl;
+    Automobil a10 = suv2;
+
+    cout << a10 << endl << endl;
+    cout << suv2 << endl << endl;
+
     Feribot f;
     cout << f.getCapacitateVehicule() << endl;
     cout << f.getSistemDeDescarcare() << endl;
@@ -1313,7 +1478,69 @@ void main() {
     cout << f2 << endl;
     cout << endl;
     f2 = f1;
-    cout << f2<< endl;
+    cout << f2 << endl;
+    cout << "Upcasting" << endl << endl;
+    Vapor v10 = f2;
+    
+    cout << "Apelare functii virtual pure:  " << endl << endl;
+    automobil1.printMarca();
+    cout << endl << endl;
+    automobil5.printRoti();
+    cout << endl << endl;
 
+    tren2.returnCuloare();
+    cout << endl << endl;
+    tren2.returnModel();
+
+
+    Automobil automobil;
+    Parcare parcare(&automobil);
+
+    parcare.metodaAbstracta();
+
+    AutomobilAbstract* pointerAutomobilAbstract;
+    Automobil* pointerAutomobil = new Automobil[10];
+    pointerAutomobil[0] = automobil3;
+    pointerAutomobil[1] = automobil5;
+    pointerAutomobil[2] = automobil1;
+    pointerAutomobil[3] = suv;
+    pointerAutomobil[4] = suv1;
+    pointerAutomobil[5] = suv2;
+    pointerAutomobil[6] = suv2;
+    pointerAutomobil[7] = automobil;
+    pointerAutomobil[8] = suv2;
+    pointerAutomobil[9] = suv1;
+
+    pointerAutomobilAbstract = pointerAutomobil;
+
+    cout << "Late binding: " << endl << endl;
+    pointerAutomobilAbstract->printMarca();
+    cout << endl << endl;
+    pointerAutomobilAbstract->printRoti();
+    pointerAutomobil->printMarca();
+    cout << endl << endl;
+    pointerAutomobil->printRoti();
+
+    MachetaTren* pointerMachetaTren;
+    Tren* pointerTren = new Tren[10];
+    pointerTren[0] = tren1;
+    pointerTren[1] = tren2;
+    pointerTren[2] = tren3;
+    pointerTren[3] = tren3;
+    pointerTren[4] = tren1;
+    pointerTren[5] = tren2;
+    pointerTren[6] = tren3;
+    pointerTren[7] = tren1;
+    pointerTren[8] = tren2;
+    pointerTren[9] = tren3;
+    pointerMachetaTren = pointerTren;
+    pointerMachetaTren->returnCuloare();
+    cout << endl << endl;
+    pointerMachetaTren->returnModel();
+    cout << endl << endl;
+    pointerTren->returnCuloare();
+    cout << endl << endl;
+    pointerTren->returnModel();
+    cout << endl << endl;
 
 }
